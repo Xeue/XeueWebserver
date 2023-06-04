@@ -1,8 +1,8 @@
-import express from 'express';
-import {WebSocketServer} from 'ws';
-import http from 'http';
-import {logs} from 'xeue-logs';
-import {config} from 'xeue-config';
+const express = require('express');
+const {logs} = require('xeue-logs');
+const {config} = require('xeue-config');
+const http = require('http');
+const {WebSocketServer} = require('ws');
 
 class Server {
 	constructor(
