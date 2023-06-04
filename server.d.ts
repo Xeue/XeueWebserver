@@ -1,5 +1,8 @@
 declare module 'xeue-webserver';
 
+type doMsgFunc = (message: Object, client: WebSocket.WebSocket) => void;
+type doClsFunc = (client: WebSocket.WebSocket) => void
+
 export class Server {
     constructor(
         port: string,
@@ -7,19 +10,20 @@ export class Server {
         logger: Object,
         version: string,
         config: Object,
-        doMessage: Function,
-		doClose: Function
+        doMessage: doMsgFunc,
+		doClose: doClsFunc
     ) {}
+
 
 	start() {}
 
 	async handleMessage(
 		msgJSON: string,
-		socket: Object
+		socket: WebSocket.WebSocket
 	) {}
 
 	handleClose(
-		socket:Object
+		socket: WebSocket.WebSocket
 	) {}
 
 	doPing(
