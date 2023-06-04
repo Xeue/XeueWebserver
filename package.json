@@ -1,0 +1,25 @@
+{
+  "name": "xeue-webserver",
+  "version": "1.0.1",
+  "description": "Basic webserver constructor",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xeue/XeueWebserver.git"
+  },
+  "author": "Sam Chilton",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Xeue/XeueWebserver/issues"
+  },
+  "homepage": "https://github.com/Xeue/XeueWebserver#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.13.0",
+    "xeue-config": "^1.5.3",
+    "xeue-logs": "^1.7.5"
+  }
+}
