@@ -22,16 +22,14 @@ export class Server {
 		socket:Object
 	) {}
 
-	doPing() {}
+	doPing(
+		serverWS: WebSocket.Server
+	) {}
 
 	makeHeader() {}
 
-	sendData(
-		connection: Object,
-		payload: Object
-	) {}
-
-	sendAllData(
+	sendTo(
+		connection: WebSocket.WebSocket,
 		payload: Object
 	) {}
 }

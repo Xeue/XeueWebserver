@@ -1,6 +1,6 @@
 {
   "name": "xeue-webserver",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Basic webserver constructor",
   "main": "server.js",
   "scripts": {

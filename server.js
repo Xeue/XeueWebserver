@@ -61,9 +61,16 @@ class Server {
 			process.exit(1);
 		});
 	
-		setInterval(doPing, 5 * 1000);
+		serverWS.sendToAll = payload => {
+			serverWS.clients.forEach(client => {
+				this.sendTo(client, payload);
+			});
+		}
+
 		this.serverWS = serverWS;
 		this.serverHTTP = serverHTTP;
+
+		setInterval(()=>{this.doPing(serverWS)}, 5 * 1000);
 		return [serverHTTP, serverWS];
 	}
 
@@ -88,7 +95,7 @@ class Server {
 				break;
 			case 'ping':
 				socket.pingStatus = 'alive';
-				this.sendData(socket, {
+				this.sendTo(socket, {
 					'command': 'pong'
 				});
 				break;
@@ -128,16 +135,16 @@ class Server {
 		}
 	}
 
-	doPing() {
+	doPing(serverWS) {
 		if (config.get('printPings')) this.logger.log('Doing client pings', 'A');
 		let alive = 0;
 		let dead = 0;
-		this.serverWS.clients.forEach(client => {
+		serverWS.clients.forEach(client => {
 			if (client.readyState !== 1) return;
 			switch (client.pingStatus) {
 			case 'alive':
 				alive++;
-				this.sendData(client, {'command': 'ping'});
+				this.sendTo(client, {'command': 'ping'});
 				client.pingStatus = 'pending';
 				break;
 			case 'pending':
@@ -164,17 +171,11 @@ class Server {
 		return header;
 	}
 
-	sendData(connection, payload) {
+	sendTo(connection, payload) {
 		connection.send(JSON.stringify({
 			'header': this.makeHeader(),
 			'payload': payload
 		}));
-	}
-
-	sendAllData(payload) {
-		this.serverWS.clients.forEach(client => {
-			this.sendData(client, payload);
-		});
 	}
 }
 
