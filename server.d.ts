@@ -36,4 +36,8 @@ export class Server {
 		connection: WebSocket.WebSocket,
 		payload: Object
 	) {}
+
+	sendToAll(
+		connection: WebSocket.WebSocket
+	) {}
 }

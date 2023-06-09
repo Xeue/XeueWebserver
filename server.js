@@ -177,6 +177,10 @@ class Server {
 			'payload': payload
 		}));
 	}
+
+	sendToAll(payload) {
+		this.serverWS.sendToAll(payload);
+	}
 }
 
 module.exports.Server = Server;
