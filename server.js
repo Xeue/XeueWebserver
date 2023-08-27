@@ -1,21 +1,29 @@
 const express = require('express');
-const {logs} = require('xeue-logs');
+const {Logs} = require('xeue-logs');
 const {config} = require('xeue-config');
 const http = require('http');
 const {WebSocketServer} = require('ws');
 
 class Server {
 	constructor(
-		port,
 		expressRoutes,
-		logger = logs,
+		logger,
 		version = "1.0.0",
 		config = config,
 		doMessage = ()=>{},
 		doClose = ()=>{}
 	) {
-		this.logger = logger;
-		this.port = port;
+		if (logger) {
+			this.logger = logger;
+		} else {
+			this.logger = new Logs(
+				false,
+				'webserverLogging',
+				path.join(__data, 'webserverLogging'),
+				'D',
+				false
+			)
+		}
 		this.expressRoutes = expressRoutes;
 		this.doMessage = doMessage;
 		this.doClose = doClose;
@@ -27,14 +35,14 @@ class Server {
 		this.serverID =`S_${loadTime}_${version}`;
 	}
 
-	start() {
+	start(port) {
 		const expressApp = express();
 		const serverWS = new WebSocketServer({noServer: true});
 		const serverHTTP = http.createServer(expressApp);
 	
 		this.expressRoutes(expressApp);
 	
-		serverHTTP.listen(this.port);
+		serverHTTP.listen(port);
 	
 		serverHTTP.on('upgrade', (request, socket, head) => {
 			this.logger.log('Upgrade request received', 'D');
