@@ -5,7 +5,6 @@ type doClsFunc = (client: WebSocket.WebSocket) => void
 
 export class Server {
     constructor(
-        port: string,
         expressRoutes: Function,
         logger: Object,
         version: string,
@@ -15,7 +14,7 @@ export class Server {
     ) {}
 
 
-	start() {}
+	start(port: number) {}
 
 	async handleMessage(
 		msgJSON: string,
@@ -38,6 +37,6 @@ export class Server {
 	) {}
 
 	sendToAll(
-		connection: WebSocket.WebSocket
+		payload: Object
 	) {}
 }
