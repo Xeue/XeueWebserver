@@ -39,4 +39,9 @@ export class Server {
 	sendToAll(
 		payload: Object
 	) {}
+
+	sendToFiltered(
+		filterFunction: Function,
+		payload: Object
+	) {}
 }

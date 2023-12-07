@@ -189,6 +189,13 @@ class Server {
 	sendToAll(payload) {
 		this.serverWS.sendToAll(payload);
 	}
+
+	sendToFiltered(filterFunction, payload) {
+		this.serverWS.clients.forEach(client => {
+			if (filterFunction(client)) this.sendTo(client, payload);
+		});
+	}
+
 }
 
 module.exports.Server = Server;
