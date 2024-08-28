@@ -104,6 +104,7 @@ class Server {
 			case 'ping':
 				socket.pingStatus = 'alive';
 				this.sendTo(socket, {
+					'module': 'core',
 					'command': 'pong'
 				});
 				break;
@@ -152,7 +153,7 @@ class Server {
 			switch (client.pingStatus) {
 			case 'alive':
 				alive++;
-				this.sendTo(client, {'command': 'ping'});
+				this.sendTo(client, {'module': 'core', 'command': 'ping'});
 				client.pingStatus = 'pending';
 				break;
 			case 'pending':
