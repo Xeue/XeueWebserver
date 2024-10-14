@@ -1,47 +1,56 @@
 declare module 'xeue-webserver';
-
-type doMsgFunc = (message: Object, client: WebSocket.WebSocket) => void;
-type doClsFunc = (client: WebSocket.WebSocket) => void
+import type http from "http"
+import type WebSocket from "ws"
+import type express from 'express';
 
 export class Server {
     constructor(
-        expressRoutes: Function,
+        expressRoutes: (expressApp: express.Application) => void,
         logger: Object,
         version: string,
         config: Object,
-        doMessage: doMsgFunc,
-		doClose: doClsFunc
-    ) {}
+        doMessage: (message: Object, client: WebSocket) => void,
+		doClose: (client: WebSocket) => void
+    )
 
 
-	start(port: number) {}
+	start(port: number): [http.Server, WebSocket.Server]
 
-	async handleMessage(
+	handleMessage(
 		msgJSON: string,
 		socket: WebSocket.WebSocket
-	) {}
+	): Promise<void>
 
 	handleClose(
 		socket: WebSocket.WebSocket
-	) {}
+	): void
 
 	doPing(
 		serverWS: WebSocket.Server
-	) {}
+	):void
 
-	makeHeader() {}
+	makeHeader(): {
+		fromID: string;
+		timestamp: number;
+		version: string;
+		type: string;
+		active: boolean;
+		messageID: number;
+		recipients: any[];
+		system: any;
+	}
 
 	sendTo(
 		connection: WebSocket.WebSocket,
 		payload: Object
-	) {}
+	): void
 
 	sendToAll(
 		payload: Object
-	) {}
+	): void
 
 	sendToFiltered(
 		filterFunction: Function,
 		payload: Object
-	) {}
+	): void
 }
