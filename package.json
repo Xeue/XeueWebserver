@@ -1,6 +1,6 @@
 {
   "name": "xeue-webserver",
-  "version": "2.0.4",
+  "version": "3.0.0",
   "description": "Basic webserver constructor",
   "main": "server.js",
   "scripts": {
@@ -18,8 +18,6 @@
   "homepage": "https://github.com/Xeue/XeueWebserver#readme",
   "dependencies": {
     "express": "^4.18.2",
-    "ws": "^8.13.0",
-    "xeue-config": "^1.5.3",
-    "xeue-logs": "^2.0.0"
+    "ws": "^8.13.0"
   }
 }

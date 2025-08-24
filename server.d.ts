@@ -2,15 +2,13 @@ declare module 'xeue-webserver';
 import type http from "http"
 import type WebSocket from "ws"
 import type express from 'express';
+import type EventEmitter from 'events';
 
-export class Server {
+export class Server extends EventEmitter {
     constructor(
-        expressRoutes: (expressApp: express.Application) => void,
-        logger: Object,
+        expressRoutes: (expressApp: express.Express) => void,
         version: string,
-        config: Object,
-        doMessage: (message: Object, client: WebSocket) => void,
-		doClose: (client: WebSocket) => void
+		serverName: string,
     )
 
 

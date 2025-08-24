@@ -1,38 +1,22 @@
+const EventEmitter = require('events');
 const express = require('express');
-const {Logs} = require('xeue-logs');
-const {config} = require('xeue-config');
 const http = require('http');
 const {WebSocketServer} = require('ws');
 
-class Server {
+class Server extends EventEmitter {
 	constructor(
 		expressRoutes,
-		logger,
 		version = "1.0.0",
-		config = config,
-		doMessage = ()=>{},
-		doClose = ()=>{}
+		serverName = "WebServer"
 	) {
-		if (logger) {
-			this.logger = logger;
-		} else {
-			this.logger = new Logs(
-				false,
-				'webserverLogging',
-				path.join(__data, 'webserverLogging'),
-				'D',
-				false
-			)
-		}
+		super()
 		this.expressRoutes = expressRoutes;
-		this.doMessage = doMessage;
-		this.doClose = doClose;
 		this.version = version;
-		this.config = config;
 		this.serverWS;
 		this.serverHTTP;
 		const loadTime = new Date().getTime();
 		this.serverID =`S_${loadTime}_${version}`;
+		this.serverName = serverName;
 	}
 
 	start(port) {
@@ -45,7 +29,8 @@ class Server {
 		serverHTTP.listen(port);
 	
 		serverHTTP.on('upgrade', (request, socket, head) => {
-			this.logger.log('Upgrade request received', 'D');
+			this.emit('log', 'D', 'Upgrade request received');
+			this.emit('log')
 			serverWS.handleUpgrade(request, socket, head, socket => {
 				serverWS.emit('connection', socket, request);
 			});
@@ -53,7 +38,7 @@ class Server {
 	
 		// Main websocket server functionality
 		serverWS.on('connection', async socket => {
-			this.logger.log('New client connected', 'D');
+			this.emit('log', 'D', 'New client connected');
 			socket.pingStatus = 'alive';
 			socket.on('message', async (msgJSON)=>{
 				await this.handleMessage(msgJSON, socket);
@@ -64,8 +49,7 @@ class Server {
 		});
 	
 		serverWS.on('error', error => {
-			this.logger.log('Server failed to start or crashed, please check the port is not in use', 'E');
-			this.logger.error("Error", error)
+			this.emit('log', 'E', 'Server failed to start or crashed, please check the port is not in use', error);
 			process.exit(1);
 		});
 	
@@ -87,7 +71,7 @@ class Server {
 		try {
 			msgObj = JSON.parse(msgJSON);
 			if (msgObj.payload.command !== 'ping' && msgObj.payload.command !== 'pong') {
-				this.logger.object('Received', msgObj, 'A');
+				this.emit('log', 'A', 'Received', msgObj);
 			}
 			const payload = msgObj.payload;
 			const header = msgObj.header;
@@ -96,7 +80,7 @@ class Server {
 			}
 			switch (payload.command) {
 			case 'disconnect':
-				this.logger.log(`${this.logger.r}${payload.data.ID}${this.logger.reset} Connection closed`, 'D');
+				this.emit('log', 'D', `${payload.data.ID} Connection closed`);
 				break;
 			case 'pong':
 				socket.pingStatus = 'alive';
@@ -109,26 +93,26 @@ class Server {
 				});
 				break;
 			case 'error':
-				this.logger.log(`Device ${header.fromID} has entered an error state`, 'E');
-				this.logger.log(`Message: ${payload.error}`, 'E');
+				this.emit('log', 'E', `Device ${header.fromID} has entered an error state`);
+				this.emit('log', 'E', `Message: ${payload.error}`);
 				break;
 			default:
-				this.doMessage(msgObj, socket);
+				this.emit('message', msgObj, socket)
 			}
 		} catch (e) {
 			try {
 				msgObj = JSON.parse(msgJSON);
 				if (msgObj.payload.command !== 'ping' && msgObj.payload.command !== 'pong') {
-					this.logger.object('Received', msgObj, 'A');
+					this.emit('log', 'A', 'Received', msgObj)
 				}
 				if (typeof msgObj.type == 'undefined') {
-					this.logger.object('Server error', e, 'E');
+					this.emit('log', 'E', 'Server error', e)
 				} else {
-					this.logger.log('A device is using an invalid JSON format', 'E');
+					this.emit('log', 'E', 'A device is using an invalid JSON format');
 				}
 			} catch (e2) {
-				this.logger.object('Invalid JSON', e, 'E');
-				this.logger.log('Received: '+msgJSON, 'A');
+				this.emit('log', 'E', 'Invalid JSON', e)
+				this.emit('log', 'A', 'Received: '+msgJSON);
 			}
 		}
 	}
@@ -136,16 +120,16 @@ class Server {
 	handleClose(socket) {
 		try {
 			const oldId = JSON.parse(JSON.stringify(socket.ID));
-			this.logger.log(`${this.logger.r}${oldId}${this.logger.reset} Connection closed`, 'D');
+			this.emit('log', 'D', `${oldId} Connection closed`);
 			socket.connected = false;
-			this.doClose(socket)
+			this.emit('exit', socket);
 		} catch (e) {
-			this.logger.log('Could not end connection cleanly','E');
+			this.emit('log', 'E', 'Could not end connection cleanly');
 		}
 	}
 
 	doPing(serverWS) {
-		if (config.get('printPings')) this.logger.log('Doing client pings', 'A');
+		this.emit('log', 'P', 'Doing client pings');
 		let alive = 0;
 		let dead = 0;
 		serverWS.clients.forEach(client => {
@@ -164,7 +148,7 @@ class Server {
 				break;
 			}
 		});
-		if (config.get('printPings')) this.logger.log(`Alive: ${alive}, Dead: ${dead}`, 'A');
+		this.emit('log', 'P', `Dead: ${dead}, Alive: ${alive}`);
 	}
 
 	makeHeader() {
@@ -176,7 +160,7 @@ class Server {
 		header.active = true;
 		header.messageID = header.timestamp;
 		header.recipients = [];
-		header.system = config.get('systemName');
+		header.system = this.serverName;
 		return header;
 	}
 
