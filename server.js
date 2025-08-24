@@ -5,26 +5,26 @@ const {WebSocketServer} = require('ws');
 
 class Server extends EventEmitter {
 	constructor(
-		expressRoutes,
 		version = "1.0.0",
 		serverName = "WebServer"
 	) {
 		super()
-		this.expressRoutes = expressRoutes;
 		this.version = version;
+		this.serverName = serverName;
 		this.serverWS;
 		this.serverHTTP;
 		const loadTime = new Date().getTime();
 		this.serverID =`S_${loadTime}_${version}`;
-		this.serverName = serverName;
+		this.router
 	}
 
 	start(port) {
 		const expressApp = express();
 		const serverWS = new WebSocketServer({noServer: true});
 		const serverHTTP = http.createServer(expressApp);
+		this.router = expressApp
 	
-		this.expressRoutes(expressApp);
+		// this.expressRoutes(expressApp);
 	
 		serverHTTP.listen(port);
 	

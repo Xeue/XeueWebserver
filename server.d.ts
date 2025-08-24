@@ -6,10 +6,11 @@ import type EventEmitter from 'events';
 
 export class Server extends EventEmitter {
     constructor(
-        expressRoutes: (expressApp: express.Express) => void,
         version: string,
 		serverName: string,
     )
+
+	router: express.Express
 
 
 	start(port: number): [http.Server, WebSocket.Server]
