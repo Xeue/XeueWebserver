@@ -3,7 +3,7 @@ import express, { Express } from 'express';
 import http from 'http';
 import WebSocket, { WebSocketServer } from 'ws';
 
-class Server extends EventEmitter {
+export class Server extends EventEmitter {
     version: string
     serverName: string
     serverID: string
@@ -26,7 +26,6 @@ class Server extends EventEmitter {
         this.router = expressApp
         this.serverHTTP.on('upgrade', (request, socket, head) => {
             this.emit('log', 'D', 'Upgrade request received');
-            this.emit('log')
             this.serverWS.handleUpgrade(request, socket, head, socket => {
                 this.serverWS.emit('connection', socket, request);
             });
@@ -39,7 +38,6 @@ class Server extends EventEmitter {
             this.clients.set(socket, {
                 pingStatus: 'alive',
                 connected: true,
-                ID: ""
             })
             socket.on('message', async (msgJSON) => {
                 await this.handleMessage(msgJSON, socket);
@@ -119,11 +117,7 @@ class Server extends EventEmitter {
 
     handleClose(client: WebSocket) {
         try {
-            const clientInfo = this.clients.get(client)
-            if (!clientInfo) throw new Error("Unknown socket closing")
-            const oldId = clientInfo.ID;
-            this.emit('log', 'D', `${oldId} Connection closed`);
-            clientInfo.connected = false
+            this.emit('log', 'D', `Connection closed`);
             this.clients.delete(client)
             this.emit('exit', client);
         } catch (e) {
@@ -193,9 +187,7 @@ class Server extends EventEmitter {
 
 }
 
-module.exports.Server = Server;
-
-type Header = {
+export type Header = {
     fromID: string;
     timestamp: number;
     version: string;
@@ -208,17 +200,16 @@ type Header = {
 
 type ClientInfo = {
     pingStatus?: 'alive' | 'pending' | 'dead'
-    ID: string
     connected: boolean
 }
 
-type Message = {
+export type Message = {
     header: Header,
     payload: Payload,
     type?: string
 }
 
-type Payload = {
+export type Payload = {
     command: string,
     module: string,
     data?: any,
